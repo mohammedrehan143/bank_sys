@@ -27,7 +27,9 @@ while True:
         username = input("Enter username: ")
         pin = input("Enter PIN: ")
 
-        if bank.login(username, pin):
+        success, message = bank.login(username, pin)
+
+        if success:
 
             print("\nLogin Successful")
 
@@ -104,7 +106,7 @@ while True:
                     print("Invalid option")
 
         else:
-            print("Invalid username or PIN")
+            print(message)
 
     elif choice == "3":
 
