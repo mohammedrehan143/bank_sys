@@ -32,7 +32,9 @@ class Bank:
         self.accounts[username] = {
             "pin": pin,
             "balance": 0,
-            "history": []
+            "history": [],
+            "failed_attempts": 0,
+            "blocked": False
         }
 
         self.save_data()
@@ -41,12 +43,29 @@ class Bank:
 
     def login(self, username, pin):
 
-        if username in self.accounts:
+        if username not in self.accounts:
+            return False, "Invalid username or PIN"
 
-            if self.accounts[username]["pin"] == pin:
-                return True
+        account = self.accounts[username]
 
-        return False
+        if account.get("blocked", False):
+            return False, "Account is blocked. Please contact support."
+
+        if account["pin"] == pin:
+            account["failed_attempts"] = 0
+            self.save_data()
+            return True, "Login successful"
+
+        account["failed_attempts"] = account.get("failed_attempts", 0) + 1
+
+        if account["failed_attempts"] >= 3:
+            account["blocked"] = True
+            self.save_data()
+            return False, "Invalid PIN. You have entered wrong PIN 3 times. Your account is blocked."
+
+        self.save_data()
+        remaining = 3 - account["failed_attempts"]
+        return False, f"Invalid PIN. {remaining} chance(s) remaining."
 
     def deposit(self, username, amount):
 
